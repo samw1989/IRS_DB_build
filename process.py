@@ -9,8 +9,8 @@ import time
 import concurrent.futures
 
 
-def open_xml(file):
-    with open(f'xml_files/{file}') as f:
+def open_xml(filepath):
+    with open(filepath) as f:
         content = f.read()
         content = content.encode('utf-8-sig')
         soup = BeautifulSoup(content, 'lxml')
@@ -98,7 +98,8 @@ def build_grants(grants, mainreturn):
 
 
 def process(file):
-    xml_contents = open_xml(file)
+    f = Path.cwd() / filepath / file
+    xml_contents = open_xml(f)
     essentials, financials, preparer = scrape_xml(xml_contents)
     mainreturn = build_main(essentials, financials, preparer, file)
     mainreturn.save()
@@ -118,7 +119,8 @@ if __name__ == '__main__':
 
     connect(db="990s", connect=False)
     print('hello')
-    files_list = [file.name.split('/')[-1] for file in Path(filepath).rglob('*.xml')]
+    files_list = [file.name for file in Path(filepath).rglob('*.xml')]
+    print(files_list)
 
     # for file in tqdm(files_list):
     #     process(file)
