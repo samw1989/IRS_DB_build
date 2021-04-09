@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
     connect(db="990s", connect=False)
     print('hello')
-    files_list = [file.name for file in Path('xml_files/').rglob('*.xml')]
+    files_list = [file.name for file in Path(filepath).rglob('*.xml')]
 
     # for file in tqdm(files_list):
     #     process(file)
