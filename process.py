@@ -4,7 +4,7 @@ from db_models import MainReturn, Grants
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 from pathlib import Path
-from mongoengine import connect
+from mongoengine import connect, errors
 import time
 import concurrent.futures
 
@@ -28,6 +28,7 @@ def scrape_xml(soup):
 def build_main(essentials, financials, preparer, filename):
     mainreturn = MainReturn(
         # Essentials
+        unique_id=essentials.ein + "-" + str(essentials.tax_year),
         source='https://s3.amazonaws.com/irs-form-990/' + filename,
         ein=essentials.ein,
         tax_year=essentials.tax_year,
@@ -81,6 +82,7 @@ def find_grant_items(xml_data):
 
 def build_grants(grants, mainreturn):
     grant_data = Grants(
+        parent_unique_id=mainreturn.ein + "-" + str(mainreturn.tax_year),
         related_org=mainreturn.id,
         grantor_name=mainreturn.name,
         grant_year=mainreturn.tax_year,
@@ -102,13 +104,16 @@ def process(file):
     xml_contents = open_xml(f)
     essentials, financials, preparer = scrape_xml(xml_contents)
     mainreturn = build_main(essentials, financials, preparer, file)
-    mainreturn.save()
-    grant_items = find_grant_items(xml_contents)
-    if grant_items:
-        for g in grant_items:
-            data = read_xml.grants(g)
-            grant_row = build_grants(data, mainreturn)
-            grant_row.save()
+    try:
+        mainreturn.save()
+        grant_items = find_grant_items(xml_contents)
+        if grant_items:
+            for g in grant_items:
+                data = read_xml.grants(g)
+                grant_row = build_grants(data, mainreturn)
+                grant_row.save()
+    except errors.NotUniqueError:
+        pass
 
 
 if __name__ == '__main__':

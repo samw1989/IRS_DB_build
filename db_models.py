@@ -18,6 +18,7 @@ class MainReturn(Document):
     year_of_formation = StringField()
     return_type = StringField()
     org_type = StringField()
+    unique_id = StringField(unique=True)
     
     # Financials
     number_employees = StringField()
@@ -50,6 +51,7 @@ class MainReturn(Document):
 
 class Grants(Document):
     related_org = ObjectIdField()
+    parent_unique_id = StringField()
     grantor_name = StringField()
     grant_year = IntField()
     grantee = StringField()

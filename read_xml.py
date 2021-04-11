@@ -31,7 +31,7 @@ def essentials(xml_data):
     street = street.get_text() if street else ""
 
     city = subsoup.find(["citynm", "city"])
-    city = city.get_text() if city() else ""
+    city = city.get_text() if city else ""
 
     state = subsoup.find(["stateabbreviationcd", "state"])
     state = state.get_text() if state else ""
